@@ -1,26 +1,26 @@
 import multer from 'multer';
 import path from 'path';
-import fs from 'fs';
-import crypto from 'crypto'
 
-const uploadDir = 'uploads/';
-// Tells node that id 'uploads' doesn't exist make one 
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true })
+const storage = multer.memoryStorage();
+const ALLOWED_MIMIED_TYPES = new Set([
+    'text/plain',
+    'application/pdf'
+]);
+const ALLOWED_EXTENSIONS = new Set(['.pdf', '.ppt', '.pptx']);
+
+const fileFilter = (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if(ALLOWED_MIMIED_TYPES.has(file.mimetype) && ALLOWED_EXTENSIONS.has(ext)){
+        cb(null,true)
+    }
+    else{
+        cb(new Error('Invalid file type. Only PDF, .txt files are allowed.'), false);
+    }
 }
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, uploadDir)
-    },
-    filename: (req, file, cb) => {
-        //random uuid
-        const uniqueSuffix = `${Date.now()}-${crypto.randomUUID()}`;
-        // Files og name 
-        const ext = path.extname(file.originalname);
-        // Final name 
-        cb(null, `${file.fieldname}-${uniqueSuffix}${ext}` );
+export const upload = multer({ storage,
+    fileFilter,
+    limits : {
+        fileSize: 10 * 1024 * 1024,
     },
 });
-
-export const upload = multer({ storage });
