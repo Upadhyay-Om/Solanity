@@ -3,6 +3,7 @@ import 'dotenv/config';
 import fs from 'fs';
 import cors from "cors";
 import uploadRoutes from "./src/routes/upload-routes.js"
+import apiRoutes from "./src/routes/Github-repo_api.js";
 
 if (!fs.existsSync("uploads")) {
   fs.mkdirSync("uploads", { recursive: true });
@@ -18,10 +19,12 @@ app.use('/uploads', express.static("uploads"));
 
 //Routes 
 app.use('/api/v1', uploadRoutes);
+app.use('/api/v1',apiRoutes);
 
 app.use((err, req, res, next) => {
   console.error('Error:', err.message);
-  res.status(400).json({ message: err.message || 'Something went wrong' });
+  const status = err.status || 400;
+  res.status(status).json({ message: err.message || 'Something went wrong' });
 });
 //ai
 // Catches promises that were rejected but not handled with .catch()
