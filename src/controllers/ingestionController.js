@@ -11,17 +11,42 @@ const OWNER = "Upadhyay-Om";
 const REPO = "CRUD-postgresssql";
 
 const allowedExtensions = [
-  ".js",
-  ".ts",
-  ".json",
-  ".md",
-  ".css",
-  ".html",
-  ".jsx",
-  ".tsx",
-  ".py",
+  // JavaScript / TypeScript
+  ".js", ".ts", ".jsx", ".tsx",
+  // Web
+  ".html", ".css",
+  // Docs
+  ".md", ".mdx", ".rst", ".txt",
+  // Config / Data
+  ".json", ".yaml", ".yml", ".toml",
+  // Backend languages
+  ".py", ".go", ".rs", ".java", ".rb", ".php", ".cs", ".kt", ".swift",
+  ".c", ".cpp", ".h", ".hpp",
+  // DB / Schema
+  ".sql", ".prisma", ".graphql", ".gql",
+  // Scripts & env templates
+  ".sh", ".bash", ".env.example",
 ];
-const excludedDirs = ["node_modules", ".git", "dist"];
+const excludedDirs = [
+  "node_modules",
+  ".git",
+  "dist",
+  "build",
+  ".next",
+  ".cache",
+  "coverage",
+  ".turbo",
+  ".vscode",
+  ".idea",
+  "__pycache__",
+  "vendor",
+  "tmp",
+  "logs",
+  "package-lock.json",
+  "yarn.lock",
+  "pnpm-lock.yaml",
+  "bun.lockb",
+];
 
 const BATCH_SIZE = 5;
 
@@ -31,8 +56,11 @@ function shouldIncludeFile(item) {
     (ext) => item.path.toLowerCase().endsWith(ext.toLowerCase()), // chks that is the ext allowed or not
   );
   const exludeDir = excludedDirs.some((dir) => item.path.startsWith(dir));
-
-  return fileType && isAllowedExt && !exludeDir;
+  const isExcludedFile = excludedFiles.some((f) =>
+    item.path.endsWith(f)
+  );
+  
+  return fileType && isAllowedExt && !exludeDir && !isExcludedFile;
 }
 
 async function fetchFilesWithConcurrency(files, concurrency = BATCH_SIZE) {
