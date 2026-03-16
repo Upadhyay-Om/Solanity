@@ -3,7 +3,7 @@ import {
   getLatestCommitSHA,
   getRepoTree,
   getFileContent,
-} from "../services/githubService.js";
+} from "./github.service.js";
 import { db } from "../db/index.js";
 import { codeFiles } from "../db/schema.js";
 
@@ -12,20 +12,46 @@ const REPO = "CRUD-postgresssql";
 
 const allowedExtensions = [
   // JavaScript / TypeScript
-  ".js", ".ts", ".jsx", ".tsx",
+  ".js",
+  ".ts",
+  ".jsx",
+  ".tsx",
   // Web
-  ".html", ".css",
+  ".html",
+  ".css",
   // Docs
-  ".md", ".mdx", ".rst", ".txt",
+  ".md",
+  ".mdx",
+  ".rst",
+  ".txt",
   // Config / Data
-  ".json", ".yaml", ".yml", ".toml",
+  ".json",
+  ".yaml",
+  ".yml",
+  ".toml",
   // Backend languages
-  ".py", ".go", ".rs", ".java", ".rb", ".php", ".cs", ".kt", ".swift",
-  ".c", ".cpp", ".h", ".hpp",
+  ".py",
+  ".go",
+  ".rs",
+  ".java",
+  ".rb",
+  ".php",
+  ".cs",
+  ".kt",
+  ".swift",
+  ".c",
+  ".cpp",
+  ".h",
+  ".hpp",
   // DB / Schema
-  ".sql", ".prisma", ".graphql", ".gql",
+  ".sql",
+  ".prisma",
+  ".graphql",
+  ".gql",
   // Scripts & env templates
-  ".sh", ".bash", ".env.example",
+  ".sh",
+  ".bash",
+  ".env.example",
 ];
 const excludedDirs = [
   "node_modules",
@@ -56,11 +82,8 @@ function shouldIncludeFile(item) {
     (ext) => item.path.toLowerCase().endsWith(ext.toLowerCase()), // chks that is the ext allowed or not
   );
   const exludeDir = excludedDirs.some((dir) => item.path.startsWith(dir));
-  const isExcludedFile = excludedFiles.some((f) =>
-    item.path.endsWith(f)
-  );
-  
-  return fileType && isAllowedExt && !exludeDir && !isExcludedFile;
+
+  return fileType && isAllowedExt && !exludeDir;
 }
 
 async function fetchFilesWithConcurrency(files, concurrency = BATCH_SIZE) {

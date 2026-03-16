@@ -93,6 +93,5 @@ export async function getFileContent(owner, repo, filePath) {
     return fileText;
   } catch (error) {
     throwGithubError(error, owner, repo);
-    return null;
   }
 }
