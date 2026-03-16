@@ -4,6 +4,7 @@ import {
   getRepoTree,
   getFileContent,
 } from "./github.service.js";
+import { and, eq } from "drizzle-orm";
 import { db } from "../db/index.js";
 import { codeFiles } from "../db/schema.js";
 
@@ -146,17 +147,19 @@ async function runIngestion({ limit = Infinity } = {}) {
       content: file.code,
     }));
 
-    await db.insert(codeFiles).values(rows);
-    console.log(`💾 Saved ${rows.length} files to database.`);
+    const inserted = await db.insert(codeFiles).values(rows).returning();
+    console.log(`Saved ${inserted.length} files to database.`);
+
+    const firstFile = inserted[0];
+    if (firstFile) {
+      console.log(`Preview of "${firstFile.filePath}":\n`);
+      console.log(firstFile.content.slice(0, 200) + "\n...");
+    }
+
+    return inserted;
   }
 
-  const firstFile = ingestedFiles[0];
-  if (firstFile) {
-    console.log(`Preview of "${firstFile.path}":\n`);
-    console.log(firstFile.code.slice(0, 200) + "\n...");
-  }
-
-  return ingestedFiles;
+  return [];
 }
 
 export const ingestRepo = async (req, res, next) => {
